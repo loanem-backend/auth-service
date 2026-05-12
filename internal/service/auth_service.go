@@ -1,0 +1,43 @@
+package service
+
+import (
+	"context"
+
+	"github.com/loanem-backend/auth-service/internal/repository"
+	"github.com/loanem-backend/auth-service/pkg/bcryptx"
+	"github.com/loanem-backend/auth-service/pkg/jwtx"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
+)
+
+type AuthService interface {
+	Login(ctx context.Context, phone, password string) (string, error)
+}
+
+type authService struct {
+	assistantRepo repository.AssistantRepository
+}
+
+func NewAuthService(ar repository.AssistantRepository) AuthService {
+	return &authService{
+		assistantRepo: ar,
+	}
+}
+
+func (s *authService) Login(ctx context.Context, phone, password string) (string, error) {
+	assistant, err := s.assistantRepo.FindByPhone(ctx, phone)
+	if err != nil {
+		return "", status.Error(codes.Internal, err.Error())
+	}
+
+	if err := bcryptx.Validate(password, assistant.HashPassword); err != nil {
+		return "", status.Error(codes.PermissionDenied, err.Error())
+	}
+
+	token, err := jwtx.GenerateToken(assistant)
+	if err != nil {
+		return "", status.Error(codes.Internal, err.Error())
+	}
+
+	return token, nil
+}
