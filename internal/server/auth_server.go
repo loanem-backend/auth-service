@@ -27,3 +27,12 @@ func (s *AuthServer) Login(ctx context.Context, req *pbauth.LoginRequest) (*pbau
 
 	return mapper.StringToLoginResponse(tokenData), nil
 }
+
+func (s *AuthServer) ValidateToken(ctx context.Context, req *pbauth.ValidateTokenRequest) (*pbauth.ValidateTokenResponse, error) {
+	claimsData, err := s.authServ.ValidateToken(ctx, req.GetToken())
+	if err != nil {
+		return nil, err
+	}
+
+	return mapper.ClaimsToValidateTokenResponse(claimsData), nil
+}

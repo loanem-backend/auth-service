@@ -12,6 +12,7 @@ import (
 
 type AuthService interface {
 	Login(ctx context.Context, phone, password string) (string, error)
+	ValidateToken(ctx context.Context, token string) (*jwtx.Claims, error)
 }
 
 type authService struct {
@@ -40,4 +41,13 @@ func (s *authService) Login(ctx context.Context, phone, password string) (string
 	}
 
 	return token, nil
+}
+
+func (s *authService) ValidateToken(ctx context.Context, token string) (*jwtx.Claims, error) {
+	claims, err := jwtx.DecodeToken(token)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	return claims, nil
 }
