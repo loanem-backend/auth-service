@@ -21,8 +21,10 @@ func registerServers(s *grpc.Server, p *pgxpool.Pool) {
 	)
 
 	var (
-		assistantServ = service.NewAuthService(assistantRepo)
+		authServ      = service.NewAuthService(assistantRepo)
+		assistantServ = service.NewAssistantService(assistantRepo)
 	)
 
-	pbauth.RegisterAuthServiceServer(s, NewAuthServer(assistantServ))
+	pbauth.RegisterAuthServiceServer(s, NewAuthServer(authServ))
+	pbauth.RegisterAssistantServiceServer(s, NewAssistantServer(assistantServ))
 }

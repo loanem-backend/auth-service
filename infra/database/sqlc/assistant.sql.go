@@ -7,7 +7,30 @@ package sqlc
 
 import (
 	"context"
+
+	"github.com/jackc/pgx/v5/pgtype"
 )
+
+const findAssistantByID = `-- name: FindAssistantByID :one
+SELECT id, name, phone, password, active, period, created_at, updated_at FROM assistants
+WHERE id = $1
+`
+
+func (q *Queries) FindAssistantByID(ctx context.Context, id int16) (Assistant, error) {
+	row := q.db.QueryRow(ctx, findAssistantByID, id)
+	var i Assistant
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Phone,
+		&i.Password,
+		&i.Active,
+		&i.Period,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
 
 const findAssistantByPhone = `-- name: FindAssistantByPhone :one
 SELECT id, name, phone, password, active, period, created_at, updated_at FROM assistants
@@ -28,4 +51,20 @@ func (q *Queries) FindAssistantByPhone(ctx context.Context, phone string) (Assis
 		&i.UpdatedAt,
 	)
 	return i, err
+}
+
+const setAssistantPassword = `-- name: SetAssistantPassword :exec
+UPDATE assistants
+SET password = $1
+WHERE id = $2
+`
+
+type SetAssistantPasswordParams struct {
+	Password pgtype.Text
+	ID       int16
+}
+
+func (q *Queries) SetAssistantPassword(ctx context.Context, arg SetAssistantPasswordParams) error {
+	_, err := q.db.Exec(ctx, setAssistantPassword, arg.Password, arg.ID)
+	return err
 }

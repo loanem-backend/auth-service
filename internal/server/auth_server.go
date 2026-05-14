@@ -10,17 +10,17 @@ import (
 
 type AuthServer struct {
 	pbauth.UnimplementedAuthServiceServer
-	authServ service.AuthService
+	serv service.AuthService
 }
 
 func NewAuthServer(as service.AuthService) *AuthServer {
 	return &AuthServer{
-		authServ: as,
+		serv: as,
 	}
 }
 
 func (s *AuthServer) Login(ctx context.Context, req *pbauth.LoginRequest) (*pbauth.LoginResponse, error) {
-	tokenData, err := s.authServ.Login(ctx, req.GetPhone(), req.GetPassword())
+	tokenData, err := s.serv.Login(ctx, req.GetPhone(), req.GetPassword())
 	if err != nil {
 		return nil, err
 	}
@@ -29,7 +29,7 @@ func (s *AuthServer) Login(ctx context.Context, req *pbauth.LoginRequest) (*pbau
 }
 
 func (s *AuthServer) ValidateToken(ctx context.Context, req *pbauth.ValidateTokenRequest) (*pbauth.ValidateTokenResponse, error) {
-	claimsData, err := s.authServ.ValidateToken(ctx, req.GetToken())
+	claimsData, err := s.serv.ValidateToken(ctx, req.GetToken())
 	if err != nil {
 		return nil, err
 	}
