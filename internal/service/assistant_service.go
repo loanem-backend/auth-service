@@ -3,7 +3,9 @@ package service
 import (
 	"context"
 	"strconv"
+	"time"
 
+	"github.com/loanem-backend/auth-service/internal/entity"
 	"github.com/loanem-backend/auth-service/internal/repository"
 	"github.com/loanem-backend/auth-service/pkg/bcryptx"
 	"google.golang.org/grpc/codes"
@@ -12,6 +14,7 @@ import (
 )
 
 type AssistantService interface {
+	Create(ctx context.Context, a *entity.Assistant) (int, error)
 	SetPassword(ctx context.Context, oldPw, newPw, confirmPw string) error
 }
 
@@ -23,6 +26,21 @@ func NewAssistantService(ar repository.AssistantRepository) AssistantService {
 	return &assistantService{
 		assistantRepo: ar,
 	}
+}
+
+func (s *assistantService) Create(ctx context.Context, a *entity.Assistant) (int, error) {
+	hashedPassword, err := bcryptx.Hash(defaultAssistantPassword)
+	if err != nil {
+		return 0, status.Error(codes.Internal, err.Error())
+	}
+
+	a.HashPassword = hashedPassword
+	assistantID, err := s.assistantRepo.Insert(ctx, a)
+	if err != nil {
+		return 0, status.Error(codes.Internal, "failed inserting assistant row")
+	}
+
+	return int(assistantID), nil
 }
 
 func (s *assistantService) SetPassword(ctx context.Context, oldPw, newPw, confirmPw string) error {
@@ -57,6 +75,7 @@ func (s *assistantService) SetPassword(ctx context.Context, oldPw, newPw, confir
 	}
 
 	assistant.HashPassword = hashedNewPw
+	assistant.UpdatedAt = time.Now()
 	if err := s.assistantRepo.UpdatePassword(ctx, assistant); err != nil {
 		return status.Error(codes.Internal, err.Error())
 	}

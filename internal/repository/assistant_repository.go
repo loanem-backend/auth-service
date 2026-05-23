@@ -11,6 +11,7 @@ import (
 type AssistantRepository interface {
 	FindByID(ctx context.Context, id int) (*entity.Assistant, error)
 	FindByPhone(ctx context.Context, phone string) (*entity.Assistant, error)
+	Insert(ctx context.Context, a *entity.Assistant) (int16, error)
 	UpdatePassword(ctx context.Context, a *entity.Assistant) error
 }
 
@@ -55,10 +56,25 @@ func toAssistant(row sqlc.Assistant) *entity.Assistant {
 	}
 }
 
+func (r *assistantRepository) Insert(ctx context.Context, a *entity.Assistant) (int16, error) {
+	result, err := r.db.InsertAssistant(ctx, sqlc.InsertAssistantParams{
+		Name:     a.Name,
+		Phone:    a.Phone,
+		Password: pgtype.Text{String: a.HashPassword, Valid: true},
+		Period:   int16(a.Period),
+	})
+	if err != nil {
+		return 0, err
+	}
+
+	return result, nil
+}
+
 func (r *assistantRepository) UpdatePassword(ctx context.Context, a *entity.Assistant) error {
 	if err := r.db.SetAssistantPassword(ctx, sqlc.SetAssistantPasswordParams{
-		ID:       int16(a.ID),
-		Password: pgtype.Text{String: a.HashPassword, Valid: true},
+		ID:        int16(a.ID),
+		Password:  pgtype.Text{String: a.HashPassword, Valid: true},
+		UpdatedAt: pgtype.Timestamp{Time: a.UpdatedAt, Valid: true},
 	}); err != nil {
 		return err
 	}

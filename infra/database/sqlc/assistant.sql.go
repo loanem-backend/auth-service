@@ -53,18 +53,44 @@ func (q *Queries) FindAssistantByPhone(ctx context.Context, phone string) (Assis
 	return i, err
 }
 
+const insertAssistant = `-- name: InsertAssistant :one
+INSERT INTO assistants (name, phone, password, period)
+VALUES ($1, $2, $3, $4)
+RETURNING id
+`
+
+type InsertAssistantParams struct {
+	Name     string
+	Phone    string
+	Password pgtype.Text
+	Period   int16
+}
+
+func (q *Queries) InsertAssistant(ctx context.Context, arg InsertAssistantParams) (int16, error) {
+	row := q.db.QueryRow(ctx, insertAssistant,
+		arg.Name,
+		arg.Phone,
+		arg.Password,
+		arg.Period,
+	)
+	var id int16
+	err := row.Scan(&id)
+	return id, err
+}
+
 const setAssistantPassword = `-- name: SetAssistantPassword :exec
 UPDATE assistants
-SET password = $1
-WHERE id = $2
+SET password = $1, updated_at = $2
+WHERE id = $3
 `
 
 type SetAssistantPasswordParams struct {
-	Password pgtype.Text
-	ID       int16
+	Password  pgtype.Text
+	UpdatedAt pgtype.Timestamp
+	ID        int16
 }
 
 func (q *Queries) SetAssistantPassword(ctx context.Context, arg SetAssistantPasswordParams) error {
-	_, err := q.db.Exec(ctx, setAssistantPassword, arg.Password, arg.ID)
+	_, err := q.db.Exec(ctx, setAssistantPassword, arg.Password, arg.UpdatedAt, arg.ID)
 	return err
 }
