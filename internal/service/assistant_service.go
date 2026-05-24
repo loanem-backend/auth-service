@@ -33,8 +33,13 @@ func (s *assistantService) Create(ctx context.Context, a *entity.Assistant) (int
 	if err != nil {
 		return 0, status.Error(codes.Internal, err.Error())
 	}
-
 	a.HashPassword = hashedPassword
+
+	a.Phone, err = cleanPhone(a.Phone)
+	if err != nil {
+		return 0, status.Error(codes.InvalidArgument, err.Error())
+	}
+
 	assistantID, err := s.assistantRepo.Insert(ctx, a)
 	if err != nil {
 		return 0, status.Error(codes.Internal, "failed inserting assistant row")

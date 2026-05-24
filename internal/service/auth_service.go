@@ -26,7 +26,12 @@ func NewAuthService(ar repository.AssistantRepository) AuthService {
 }
 
 func (s *authService) Login(ctx context.Context, phone, password string) (string, error) {
-	assistant, err := s.assistantRepo.FindByPhone(ctx, phone)
+	phoneClean, err := cleanPhone(phone)
+	if err != nil {
+		return "", status.Error(codes.InvalidArgument, err.Error())
+	}
+
+	assistant, err := s.assistantRepo.FindByPhone(ctx, phoneClean)
 	if err != nil {
 		return "", status.Error(codes.Internal, err.Error())
 	}
