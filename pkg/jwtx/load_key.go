@@ -15,3 +15,12 @@ func loadPrivate(path string) (*rsa.PrivateKey, error) {
 
 	return jwt.ParseRSAPrivateKeyFromPEM(content)
 }
+
+func loadPublic(path string) (*rsa.PublicKey, error) {
+	content, err := os.ReadFile(path)
+	if err != nil {
+		return nil, err
+	}
+
+	return jwt.ParseRSAPublicKeyFromPEM(content)
+}
