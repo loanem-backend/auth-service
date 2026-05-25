@@ -29,7 +29,7 @@ func GenerateToken(a *entity.Assistant) (string, error) {
 
 	token := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
 
-	privateKey, err := loadPrivate(config.GetEnv("JWT_PRIVATE_KEY", "./backend-infra/keys/jwt_private.pem"))
+	privateKey, err := loadPrivate(config.GetEnv("JWT_PRIVATE_KEY", "./keys/jwt_private.pem"))
 	if err != nil {
 		return "", err
 	}

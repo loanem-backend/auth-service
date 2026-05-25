@@ -9,12 +9,21 @@ import (
 )
 
 func DecodeToken(signedToken string) (*Claims, error) {
-	token, err := jwt.ParseWithClaims(signedToken, &Claims{}, func(t *jwt.Token) (interface{}, error) {
-		if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, errors.New("unexpected signing method")
-		}
-		return []byte(config.GetEnv("JWT_SECRET_KEY", "")), nil
-	})
+	publicKey, err := loadPublic(config.GetEnv("JWT_PUBLIC_KEY", "./keys/jwt_public.pem"))
+	if err != nil {
+		return nil, err
+	}
+
+	token, err := jwt.ParseWithClaims(
+		signedToken, &Claims{},
+		func(t *jwt.Token) (interface{}, error) {
+			if _, ok := t.Method.(*jwt.SigningMethodRSA); !ok {
+				return nil, errors.New("unexpected signing method")
+			}
+
+			return publicKey, nil
+		},
+	)
 	if err != nil {
 		return nil, fmt.Errorf("failed parsing token: %w", err)
 	}

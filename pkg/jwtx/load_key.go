@@ -2,9 +2,9 @@ package jwtx
 
 import (
 	"crypto/rsa"
-	"crypto/x509"
-	"encoding/pem"
 	"os"
+
+	"github.com/golang-jwt/jwt/v5"
 )
 
 func loadPrivate(path string) (*rsa.PrivateKey, error) {
@@ -13,7 +13,14 @@ func loadPrivate(path string) (*rsa.PrivateKey, error) {
 		return nil, err
 	}
 
-	b, _ := pem.Decode(content)
+	return jwt.ParseRSAPrivateKeyFromPEM(content)
+}
 
-	return x509.ParsePKCS1PrivateKey(b.Bytes)
+func loadPublic(path string) (*rsa.PublicKey, error) {
+	content, err := os.ReadFile(path)
+	if err != nil {
+		return nil, err
+	}
+
+	return jwt.ParseRSAPublicKeyFromPEM(content)
 }
