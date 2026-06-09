@@ -36,3 +36,14 @@ func (s *AuthServer) ValidateToken(ctx context.Context, req *pbauth.ValidateToke
 
 	return mapper.ClaimsToValidateTokenResponse(claimsData), nil
 }
+
+func (s *AuthServer) RefreshToken(ctx context.Context, req *pbauth.RefreshTokenRequest) (*pbauth.RefreshTokenResponse, error) {
+	accessToken, err := s.serv.RefreshToken(ctx, req.GetRefreshToken())
+	if err != nil {
+		return nil, err
+	}
+
+	return &pbauth.RefreshTokenResponse{
+		AccessToken: accessToken,
+	}, nil
+}

@@ -33,6 +33,8 @@ github.com/loanem-backend/protos v0.0.0-20260607030806-9a7c6df8fff9 h1:cIeRPijLw
 github.com/loanem-backend/protos v0.0.0-20260607030806-9a7c6df8fff9/go.mod h1:WeVOgyBItLRSJ1mgjcFcGWvvKgpTEoaYxCWHUtUr0fA=
 github.com/loanem-backend/protos v0.0.0-20260609043040-5d9979a9553e h1:n+zgBrHFot/ZUSYwTOErKUYZrQohXhVM3ehNZBW+Ajc=
 github.com/loanem-backend/protos v0.0.0-20260609043040-5d9979a9553e/go.mod h1:JqvDnGNSyNkkARChzi0qqK3sl/0nJjB+ny5/DvjG49Q=
+github.com/loanem-backend/protos v0.0.0-20260609072848-7005a63ea07d h1:Q/fRk7U6iWqB+KoOskUKYm5HQRvf6chhxKM+inEXKak=
+github.com/loanem-backend/protos v0.0.0-20260609072848-7005a63ea07d/go.mod h1:JqvDnGNSyNkkARChzi0qqK3sl/0nJjB+ny5/DvjG49Q=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/redis/go-redis/v9 v9.20.0 h1:WnQYxLkgO2xiXTCJY0ldIiI8dNqCDlQAG+AtaH7a2a0=

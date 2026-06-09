@@ -10,7 +10,7 @@ import (
 
 type RedisRepository interface {
 	Store(ctx context.Context, key string, value any, dur time.Duration) error
-	GetString(ctx context.Context, key string) (string, error)
+	GetInt(ctx context.Context, key string) (int, error)
 }
 
 type redisRepository struct {
@@ -27,8 +27,8 @@ func (r *redisRepository) Store(ctx context.Context, key string, value any, dur 
 	return r.client.Set(ctx, key, value, dur).Err()
 }
 
-func (r *redisRepository) GetString(ctx context.Context, key string) (string, error) {
-	val, err := r.client.Get(ctx, key).Result()
+func (r *redisRepository) GetInt(ctx context.Context, key string) (int, error) {
+	val, err := r.client.Get(ctx, key).Int()
 
 	if errors.Is(err, redis.Nil) {
 		err = RedisNil
@@ -36,5 +36,3 @@ func (r *redisRepository) GetString(ctx context.Context, key string) (string, er
 
 	return val, err
 }
-
-const RedisNil = redis.Nil
