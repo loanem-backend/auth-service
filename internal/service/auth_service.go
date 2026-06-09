@@ -19,11 +19,13 @@ type AuthService interface {
 
 type authService struct {
 	assistantRepo repository.AssistantRepository
+	redisRepo     repository.RedisRepository
 }
 
-func NewAuthService(ar repository.AssistantRepository) AuthService {
+func NewAuthService(ar repository.AssistantRepository, rr repository.RedisRepository) AuthService {
 	return &authService{
 		assistantRepo: ar,
+		redisRepo:     rr,
 	}
 }
 
@@ -47,9 +49,13 @@ func (s *authService) Login(ctx context.Context, phone, password string) (string
 		return "", "", status.Error(codes.Internal, err.Error())
 	}
 
-	refreshToken, err := jwtx.GenerateRefreshToken(assistant.ID)
+	refreshTokenDur, refreshToken, err := jwtx.GenerateRefreshToken(assistant.ID)
 	if err != nil {
 		return "", "", status.Error(codes.Internal, err.Error())
+	}
+
+	if err := s.redisRepo.Store(ctx, prefixRedisRefreshToken+refreshToken, assistant.ID, refreshTokenDur); err != nil {
+		// log error
 	}
 
 	return accessToken, refreshToken, nil

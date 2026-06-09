@@ -1,3 +1,7 @@
 package service
 
-const defaultAssistantPassword = "assistant123"
+const (
+	defaultAssistantPassword = "assistant123"
+
+	prefixRedisRefreshToken = "refresh-token:"
+)

@@ -37,13 +37,13 @@ func GenerateAccessToken(a *entity.Assistant) (string, error) {
 	return token.SignedString(privateKey)
 }
 
-func GenerateRefreshToken(aID int) (string, error) {
+func GenerateRefreshToken(aID int) (time.Duration, string, error) {
 	timeNow := time.Now()
 
 	expireDurationStr := config.GetEnv("JWT_REFRESH_EXPIRE", "36h")
 	expDuration, err := time.ParseDuration(expireDurationStr)
 	if err != nil {
-		return "", err
+		return 0, "", err
 	}
 
 	claims := Claims{
@@ -59,8 +59,10 @@ func GenerateRefreshToken(aID int) (string, error) {
 
 	privateKey, err := loadPrivate(config.GetEnv("JWT_PRIVATE_KEY", "./keys/jwt_private.pem"))
 	if err != nil {
-		return "", err
+		return 0, "", err
 	}
 
-	return token.SignedString(privateKey)
+	signedToken, err := token.SignedString(privateKey)
+
+	return expDuration, signedToken, err
 }
