@@ -8,10 +8,10 @@ import (
 	"github.com/loanem-backend/auth-service/internal/entity"
 )
 
-func GenerateToken(a *entity.Assistant) (string, error) {
+func GenerateAccessToken(a *entity.Assistant) (string, error) {
 	timeNow := time.Now()
 
-	expireDurationStr := config.GetEnv("JWT_EXPIRE", "30m")
+	expireDurationStr := config.GetEnv("JWT_ACCESS_EXPIRE", "30m")
 	expDuration, err := time.ParseDuration(expireDurationStr)
 	if err != nil {
 		return "", err
@@ -20,6 +20,34 @@ func GenerateToken(a *entity.Assistant) (string, error) {
 	claims := Claims{
 		ID:   a.ID,
 		Name: a.Name,
+		RegisteredClaims: jwt.RegisteredClaims{
+			Issuer:    "auth-service",
+			IssuedAt:  jwt.NewNumericDate(timeNow),
+			ExpiresAt: jwt.NewNumericDate(timeNow.Add(expDuration)),
+		},
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
+
+	privateKey, err := loadPrivate(config.GetEnv("JWT_PRIVATE_KEY", "./keys/jwt_private.pem"))
+	if err != nil {
+		return "", err
+	}
+
+	return token.SignedString(privateKey)
+}
+
+func GenerateRefreshToken(aID int) (string, error) {
+	timeNow := time.Now()
+
+	expireDurationStr := config.GetEnv("JWT_REFRESH_EXPIRE", "36h")
+	expDuration, err := time.ParseDuration(expireDurationStr)
+	if err != nil {
+		return "", err
+	}
+
+	claims := Claims{
+		ID: aID,
 		RegisteredClaims: jwt.RegisteredClaims{
 			Issuer:    "auth-service",
 			IssuedAt:  jwt.NewNumericDate(timeNow),

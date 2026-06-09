@@ -6,7 +6,7 @@ require (
 	github.com/golang-jwt/jwt/v5 v5.3.1
 	github.com/jackc/pgx/v5 v5.9.2
 	github.com/joho/godotenv v1.5.1
-	github.com/loanem-backend/protos v0.0.0-20260514004305-40b998e4ea73
+	github.com/loanem-backend/protos v0.0.0-20260609043040-5d9979a9553e
 	golang.org/x/crypto v0.51.0
 	google.golang.org/grpc v1.81.0
 )

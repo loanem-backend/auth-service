@@ -11,7 +11,9 @@ import (
 )
 
 type AuthService interface {
-	Login(ctx context.Context, phone, password string) (string, error)
+	// Login returns an access token, a refresh token, and an error in order.
+	Login(ctx context.Context, phone, password string) (string, string, error)
+
 	ValidateToken(ctx context.Context, token string) (*jwtx.Claims, error)
 }
 
@@ -25,27 +27,32 @@ func NewAuthService(ar repository.AssistantRepository) AuthService {
 	}
 }
 
-func (s *authService) Login(ctx context.Context, phone, password string) (string, error) {
+func (s *authService) Login(ctx context.Context, phone, password string) (string, string, error) {
 	phoneClean, err := cleanPhone(phone)
 	if err != nil {
-		return "", status.Error(codes.InvalidArgument, err.Error())
+		return "", "", status.Error(codes.InvalidArgument, err.Error())
 	}
 
 	assistant, err := s.assistantRepo.FindByPhone(ctx, phoneClean)
 	if err != nil {
-		return "", status.Error(codes.Internal, err.Error())
+		return "", "", status.Error(codes.Internal, err.Error())
 	}
 
 	if err := bcryptx.Validate(password, assistant.HashPassword); err != nil {
-		return "", status.Error(codes.PermissionDenied, err.Error())
+		return "", "", status.Error(codes.PermissionDenied, err.Error())
 	}
 
-	token, err := jwtx.GenerateToken(assistant)
+	accessToken, err := jwtx.GenerateAccessToken(assistant)
 	if err != nil {
-		return "", status.Error(codes.Internal, err.Error())
+		return "", "", status.Error(codes.Internal, err.Error())
 	}
 
-	return token, nil
+	refreshToken, err := jwtx.GenerateRefreshToken(assistant.ID)
+	if err != nil {
+		return "", "", status.Error(codes.Internal, err.Error())
+	}
+
+	return accessToken, refreshToken, nil
 }
 
 func (s *authService) ValidateToken(ctx context.Context, token string) (*jwtx.Claims, error) {

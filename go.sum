@@ -29,6 +29,10 @@ github.com/loanem-backend/protos v0.0.0-20260511170206-4dc37573c7fd h1:S3/lh+uYO
 github.com/loanem-backend/protos v0.0.0-20260511170206-4dc37573c7fd/go.mod h1:WeVOgyBItLRSJ1mgjcFcGWvvKgpTEoaYxCWHUtUr0fA=
 github.com/loanem-backend/protos v0.0.0-20260514004305-40b998e4ea73 h1:Rq+Ld0zEuKjIZLfsXTFNX1PllkSTr1nWJW4sHjyEEPA=
 github.com/loanem-backend/protos v0.0.0-20260514004305-40b998e4ea73/go.mod h1:WeVOgyBItLRSJ1mgjcFcGWvvKgpTEoaYxCWHUtUr0fA=
+github.com/loanem-backend/protos v0.0.0-20260607030806-9a7c6df8fff9 h1:cIeRPijLwOq3Xpn0Bfy2PV5ApLiNPuKKzsiEhNW/e9M=
+github.com/loanem-backend/protos v0.0.0-20260607030806-9a7c6df8fff9/go.mod h1:WeVOgyBItLRSJ1mgjcFcGWvvKgpTEoaYxCWHUtUr0fA=
+github.com/loanem-backend/protos v0.0.0-20260609043040-5d9979a9553e h1:n+zgBrHFot/ZUSYwTOErKUYZrQohXhVM3ehNZBW+Ajc=
+github.com/loanem-backend/protos v0.0.0-20260609043040-5d9979a9553e/go.mod h1:JqvDnGNSyNkkARChzi0qqK3sl/0nJjB+ny5/DvjG49Q=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=

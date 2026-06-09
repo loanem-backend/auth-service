@@ -20,12 +20,12 @@ func NewAuthServer(as service.AuthService) *AuthServer {
 }
 
 func (s *AuthServer) Login(ctx context.Context, req *pbauth.LoginRequest) (*pbauth.LoginResponse, error) {
-	tokenData, err := s.serv.Login(ctx, req.GetPhone(), req.GetPassword())
+	accessToken, refreshToken, err := s.serv.Login(ctx, req.GetPhone(), req.GetPassword())
 	if err != nil {
 		return nil, err
 	}
 
-	return mapper.StringToLoginResponse(tokenData), nil
+	return mapper.StringsToLoginResponse(accessToken, refreshToken), nil
 }
 
 func (s *AuthServer) ValidateToken(ctx context.Context, req *pbauth.ValidateTokenRequest) (*pbauth.ValidateTokenResponse, error) {

@@ -5,9 +5,11 @@ import (
 	pbauth "github.com/loanem-backend/protos/pb/proto/services/auth/v1"
 )
 
-func StringToLoginResponse(s string) *pbauth.LoginResponse {
+// StringsToLoginResponse accepts an access token and a refresh token in order.
+func StringsToLoginResponse(at, rt string) *pbauth.LoginResponse {
 	return &pbauth.LoginResponse{
-		Token: s,
+		AccessToken:  at,
+		RefreshToken: rt,
 	}
 }
 
