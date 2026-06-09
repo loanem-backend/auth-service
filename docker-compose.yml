@@ -1,36 +1,6 @@
 version: '3.8'
 
 services:
-  api:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: auth-service
-    restart: unless-stopped
-    ports:
-      - "${APP_PORT}:${APP_PORT}"
-    depends_on:
-      - postgres
-    env_file:
-      - .env
-    networks:
-      - backend-network
-
-  postgres:
-    image: postgres:15.6-alpine
-    container_name: postgres-db
-    restart: unless-stopped
-    ports:
-      - "5432:5432"
-    environment:
-      POSTGRES_USER: ${DB_USER}
-      POSTGRES_PASSWORD: ${DB_PASS}
-      POSTGRES_DB: ${DB_NAME}
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    networks:
-      - backend-network
-
   migrate:
     image: migrate/migrate
     profiles: ["manual"]
@@ -44,8 +14,6 @@ services:
       - "postgres://${DB_USER}:${DB_PASS}@postgres:5432/${DB_NAME}?sslmode=disable"
     volumes:
       - ./infra/database/migrations:/migrations
-    networks:
-      - backend-network
 
   sqlc:
     image: sqlc/sqlc:1.27.0
@@ -53,10 +21,3 @@ services:
     volumes:
       - ./:/app
     command: ["generate"]
-
-volumes:
-  postgres_data:
-
-networks:
-  backend-network:
-    driver: bridge
