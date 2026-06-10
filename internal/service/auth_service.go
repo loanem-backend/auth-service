@@ -129,8 +129,10 @@ func (s *authService) RefreshToken(ctx context.Context, refreshToken string) (st
 
 func (s *authService) Logout(ctx context.Context, accessToken, refreshToken string) error {
 	// remove refresh token from Redis
-	if err := s.redisRepo.Delete(ctx, prefixRedisRefreshToken+refreshToken); err != nil {
-		return status.Error(codes.Internal, err.Error())
+	if refreshToken != "" {
+		if err := s.redisRepo.Delete(ctx, prefixRedisRefreshToken+refreshToken); err != nil {
+			return status.Error(codes.Internal, err.Error())
+		}
 	}
 
 	claims, err := jwtx.DecodeToken(accessToken)
