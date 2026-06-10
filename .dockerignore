@@ -1,5 +1,7 @@
 .git
 .env
 *.env
+.idea
+.vscode
 bin/
 vendor/

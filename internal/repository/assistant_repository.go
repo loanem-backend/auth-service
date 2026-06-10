@@ -2,7 +2,9 @@ package repository
 
 import (
 	"context"
+	"errors"
 
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/loanem-backend/auth-service/infra/database/sqlc"
 	"github.com/loanem-backend/auth-service/internal/entity"
@@ -37,6 +39,9 @@ func (r *assistantRepository) FindByID(ctx context.Context, id int) (*entity.Ass
 func (r *assistantRepository) FindByPhone(ctx context.Context, phone string) (*entity.Assistant, error) {
 	row, err := r.db.FindAssistantByPhone(ctx, phone)
 	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, ErrFindByPhoneNotFound
+		}
 		return nil, err
 	}
 

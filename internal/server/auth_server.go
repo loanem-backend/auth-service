@@ -20,19 +20,40 @@ func NewAuthServer(as service.AuthService) *AuthServer {
 }
 
 func (s *AuthServer) Login(ctx context.Context, req *pbauth.LoginRequest) (*pbauth.LoginResponse, error) {
-	tokenData, err := s.serv.Login(ctx, req.GetPhone(), req.GetPassword())
+	accessToken, refreshToken, refreshExpHour, err := s.serv.Login(ctx, req.GetPhone(), req.GetPassword())
 	if err != nil {
 		return nil, err
 	}
 
-	return mapper.StringToLoginResponse(tokenData), nil
+	return mapper.StringsToLoginResponse(accessToken, refreshToken, refreshExpHour), nil
 }
 
 func (s *AuthServer) ValidateToken(ctx context.Context, req *pbauth.ValidateTokenRequest) (*pbauth.ValidateTokenResponse, error) {
-	claimsData, err := s.serv.ValidateToken(ctx, req.GetToken())
+	claimsData, err := s.serv.ValidateToken(ctx, req.GetAccessToken())
 	if err != nil {
 		return nil, err
 	}
 
 	return mapper.ClaimsToValidateTokenResponse(claimsData), nil
+}
+
+func (s *AuthServer) RefreshToken(ctx context.Context, req *pbauth.RefreshTokenRequest) (*pbauth.RefreshTokenResponse, error) {
+	accessToken, refreshToken, refreshTokenDur, err := s.serv.RefreshToken(ctx, req.GetRefreshToken())
+	if err != nil {
+		return nil, err
+	}
+
+	return &pbauth.RefreshTokenResponse{
+		AccessToken:           accessToken,
+		RefreshToken:          refreshToken,
+		RefreshExpirationHour: refreshTokenDur,
+	}, nil
+}
+
+func (s *AuthServer) Logout(ctx context.Context, req *pbauth.LogoutRequest) (*pbauth.LogoutResponse, error) {
+	if err := s.serv.Logout(ctx, req.GetAccessToken(), req.GetRefreshToken()); err != nil {
+		return nil, err
+	}
+
+	return &pbauth.LogoutResponse{}, nil
 }
