@@ -38,13 +38,15 @@ func (s *AuthServer) ValidateToken(ctx context.Context, req *pbauth.ValidateToke
 }
 
 func (s *AuthServer) RefreshToken(ctx context.Context, req *pbauth.RefreshTokenRequest) (*pbauth.RefreshTokenResponse, error) {
-	accessToken, err := s.serv.RefreshToken(ctx, req.GetRefreshToken())
+	accessToken, refreshToken, refreshTokenDur, err := s.serv.RefreshToken(ctx, req.GetRefreshToken())
 	if err != nil {
 		return nil, err
 	}
 
 	return &pbauth.RefreshTokenResponse{
-		AccessToken: accessToken,
+		AccessToken:           accessToken,
+		RefreshToken:          refreshToken,
+		RefreshExpirationHour: refreshTokenDur,
 	}, nil
 }
 

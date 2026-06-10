@@ -18,7 +18,7 @@ type AuthService interface {
 	ValidateToken(ctx context.Context, token string) (*jwtx.Claims, error)
 
 	// RefreshToken returns a new access token and an error
-	RefreshToken(ctx context.Context, refreshToken string) (string, error)
+	RefreshToken(ctx context.Context, refreshToken string) (string, string, int32, error)
 
 	Logout(ctx context.Context, accessToken, refreshToken string) error
 }
@@ -46,6 +46,7 @@ func (s *authService) Login(ctx context.Context, phone, password string) (string
 		return "", "", 0, status.Error(codes.Internal, err.Error())
 	}
 
+	// verify password
 	if err := bcryptx.Validate(password, assistant.HashPassword); err != nil {
 		return "", "", 0, status.Error(codes.PermissionDenied, err.Error())
 	}
@@ -73,28 +74,57 @@ func (s *authService) ValidateToken(ctx context.Context, token string) (*jwtx.Cl
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	// check blacklist
+	// check blacklist in Redis (exists id user logged out)
+	_, err = s.redisRepo.GetInt(ctx, prefixRedisBlacklistToken+claims.JwtID)
+	if err != nil {
+		if err != repository.RedisNil {
+			return nil, status.Error(codes.Internal, err.Error())
+		}
+	} else {
+		return nil, status.Error(codes.PermissionDenied, "already logged out")
+	}
 
 	return claims, nil
 }
 
-func (s *authService) RefreshToken(ctx context.Context, refreshToken string) (string, error) {
+func (s *authService) RefreshToken(ctx context.Context, refreshToken string) (string, string, int32, error) {
+	// validate token before fetching from Redis
+	_, err := jwtx.DecodeToken(refreshToken)
+	if err != nil {
+		return "", "", 0, status.Error(codes.Unauthenticated, err.Error())
+	}
+
+	// fetch assistant ID from Redis
 	assistantID, err := s.redisRepo.GetInt(ctx, prefixRedisRefreshToken+refreshToken)
 	if err != nil {
-		return "", status.Error(codes.DeadlineExceeded, "refresh token has been expired")
+		return "", "", 0, status.Error(codes.DeadlineExceeded, "refresh token has been expired")
 	}
 
 	assistant, err := s.assistantRepo.FindByID(ctx, assistantID)
 	if err != nil {
-		return "", status.Error(codes.Internal, err.Error())
+		return "", "", 0, status.Error(codes.Internal, err.Error())
 	}
 
+	// generate new access token
 	accessToken, err := jwtx.GenerateAccessToken(assistant)
 	if err != nil {
-		return "", status.Error(codes.Internal, err.Error())
+		return "", "", 0, status.Error(codes.Internal, err.Error())
 	}
 
-	return accessToken, nil
+	refreshTokenDur, newRefreshToken, err := jwtx.GenerateRefreshToken(assistant.ID)
+	if err != nil {
+		return "", "", 0, status.Error(codes.Internal, err.Error())
+	}
+
+	if err := s.redisRepo.Delete(ctx, prefixRedisRefreshToken+refreshToken); err != nil {
+		return "", "", 0, status.Error(codes.Internal, err.Error())
+	}
+
+	if err := s.redisRepo.Store(ctx, prefixRedisRefreshToken+newRefreshToken, assistant.ID, refreshTokenDur); err != nil {
+		// log error
+	}
+
+	return accessToken, refreshToken, int32(refreshTokenDur / time.Hour), nil
 }
 
 func (s *authService) Logout(ctx context.Context, accessToken, refreshToken string) error {
