@@ -11,6 +11,7 @@ import (
 type RedisRepository interface {
 	Store(ctx context.Context, key string, value any, dur time.Duration) error
 	GetInt(ctx context.Context, key string) (int, error)
+	Delete(ctx context.Context, key string) error
 }
 
 type redisRepository struct {
@@ -35,4 +36,8 @@ func (r *redisRepository) GetInt(ctx context.Context, key string) (int, error) {
 	}
 
 	return val, err
+}
+
+func (r *redisRepository) Delete(ctx context.Context, key string) error {
+	return r.client.Del(ctx, key).Err()
 }

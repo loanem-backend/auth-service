@@ -6,10 +6,11 @@ import (
 )
 
 // StringsToLoginResponse accepts an access token and a refresh token in order.
-func StringsToLoginResponse(at, rt string) *pbauth.LoginResponse {
+func StringsToLoginResponse(at, rt string, refreshExpHour int32) *pbauth.LoginResponse {
 	return &pbauth.LoginResponse{
-		AccessToken:  at,
-		RefreshToken: rt,
+		AccessToken:           at,
+		RefreshToken:          rt,
+		RefreshExpirationHour: refreshExpHour,
 	}
 }
 

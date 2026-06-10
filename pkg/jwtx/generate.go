@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/google/uuid"
 	"github.com/loanem-backend/auth-service/config"
 	"github.com/loanem-backend/auth-service/internal/entity"
 )
@@ -25,6 +26,7 @@ func GenerateAccessToken(a *entity.Assistant) (string, error) {
 			IssuedAt:  jwt.NewNumericDate(timeNow),
 			ExpiresAt: jwt.NewNumericDate(timeNow.Add(expDuration)),
 		},
+		JwtID: uuid.NewString(),
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)

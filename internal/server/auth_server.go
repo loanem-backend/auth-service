@@ -20,16 +20,16 @@ func NewAuthServer(as service.AuthService) *AuthServer {
 }
 
 func (s *AuthServer) Login(ctx context.Context, req *pbauth.LoginRequest) (*pbauth.LoginResponse, error) {
-	accessToken, refreshToken, err := s.serv.Login(ctx, req.GetPhone(), req.GetPassword())
+	accessToken, refreshToken, refreshExpHour, err := s.serv.Login(ctx, req.GetPhone(), req.GetPassword())
 	if err != nil {
 		return nil, err
 	}
 
-	return mapper.StringsToLoginResponse(accessToken, refreshToken), nil
+	return mapper.StringsToLoginResponse(accessToken, refreshToken, refreshExpHour), nil
 }
 
 func (s *AuthServer) ValidateToken(ctx context.Context, req *pbauth.ValidateTokenRequest) (*pbauth.ValidateTokenResponse, error) {
-	claimsData, err := s.serv.ValidateToken(ctx, req.GetToken())
+	claimsData, err := s.serv.ValidateToken(ctx, req.GetAccessToken())
 	if err != nil {
 		return nil, err
 	}
@@ -46,4 +46,12 @@ func (s *AuthServer) RefreshToken(ctx context.Context, req *pbauth.RefreshTokenR
 	return &pbauth.RefreshTokenResponse{
 		AccessToken: accessToken,
 	}, nil
+}
+
+func (s *AuthServer) Logout(ctx context.Context, req *pbauth.LogoutRequest) (*pbauth.LogoutResponse, error) {
+	if err := s.serv.Logout(ctx, req.GetAccessToken(), req.GetRefreshToken()); err != nil {
+		return nil, err
+	}
+
+	return &pbauth.LogoutResponse{}, nil
 }
