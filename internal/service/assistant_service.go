@@ -16,6 +16,8 @@ import (
 type AssistantService interface {
 	Create(ctx context.Context, a *entity.Assistant) (int, error)
 	SetPassword(ctx context.Context, oldPw, newPw, confirmPw string) error
+
+	GetActiveAssistants(ctx context.Context) ([]*entity.Assistant, error)
 }
 
 type assistantService struct {
@@ -94,4 +96,13 @@ func (s *assistantService) SetPassword(ctx context.Context, oldPw, newPw, confir
 	}
 
 	return nil
+}
+
+func (s *assistantService) GetActiveAssistants(ctx context.Context) ([]*entity.Assistant, error) {
+	assistants, err := s.assistantRepo.FindActiveAssistants(ctx)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	return assistants, nil
 }

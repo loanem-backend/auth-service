@@ -15,3 +15,8 @@ RETURNING id;
 UPDATE assistants
 SET password = $1, updated_at = $2
 WHERE id = $3;
+
+-- name: FindActiveAssistants :many
+SELECT * FROM assistants
+WHERE active = TRUE
+ORDER BY period, name;

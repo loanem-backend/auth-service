@@ -15,6 +15,8 @@ type AssistantRepository interface {
 	FindByPhone(ctx context.Context, phone string) (*entity.Assistant, error)
 	Insert(ctx context.Context, a *entity.Assistant) (int16, error)
 	UpdatePassword(ctx context.Context, a *entity.Assistant) error
+
+	FindActiveAssistants(ctx context.Context) ([]*entity.Assistant, error)
 }
 
 type assistantRepository struct {
@@ -85,4 +87,18 @@ func (r *assistantRepository) UpdatePassword(ctx context.Context, a *entity.Assi
 	}
 
 	return nil
+}
+
+func (r *assistantRepository) FindActiveAssistants(ctx context.Context) ([]*entity.Assistant, error) {
+	rows, err := r.db.FindActiveAssistants(ctx)
+	if err != nil {
+		return []*entity.Assistant{}, err
+	}
+
+	assistants := make([]*entity.Assistant, len(rows))
+	for i, row := range rows {
+		assistants[i] = toAssistant(row)
+	}
+
+	return assistants, nil
 }

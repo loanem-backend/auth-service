@@ -11,6 +11,41 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const findActiveAssistants = `-- name: FindActiveAssistants :many
+SELECT id, name, phone, password, active, period, created_at, updated_at FROM assistants
+WHERE active = TRUE
+ORDER BY period, name
+`
+
+func (q *Queries) FindActiveAssistants(ctx context.Context) ([]Assistant, error) {
+	rows, err := q.db.Query(ctx, findActiveAssistants)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Assistant
+	for rows.Next() {
+		var i Assistant
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.Phone,
+			&i.Password,
+			&i.Active,
+			&i.Period,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const findAssistantByID = `-- name: FindAssistantByID :one
 SELECT id, name, phone, password, active, period, created_at, updated_at FROM assistants
 WHERE id = $1
