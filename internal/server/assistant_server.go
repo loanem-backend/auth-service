@@ -37,3 +37,12 @@ func (s *AssistantServer) SetAssistantPassword(ctx context.Context, req *pbauth.
 
 	return &pbauth.SetAssistantPasswordResponse{}, nil
 }
+
+func (s *AssistantServer) GetActiveAssistants(ctx context.Context, req *pbauth.GetActiveAssistantsRequest) (*pbauth.GetActiveAssistantsResponse, error) {
+	assistantsData, err := s.serv.GetActiveAssistants(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return mapper.AssistantsToGetActiveAssistantsResponse(assistantsData), nil
+}
