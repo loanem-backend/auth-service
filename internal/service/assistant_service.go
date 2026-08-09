@@ -18,6 +18,7 @@ type AssistantService interface {
 	SetPassword(ctx context.Context, oldPw, newPw, confirmPw string) error
 
 	GetActiveAssistants(ctx context.Context) ([]*entity.Assistant, error)
+	DeleteAssistant(ctx context.Context, assistantID int) error
 }
 
 type assistantService struct {
@@ -105,4 +106,12 @@ func (s *assistantService) GetActiveAssistants(ctx context.Context) ([]*entity.A
 	}
 
 	return assistants, nil
+}
+
+func (s *assistantService) DeleteAssistant(ctx context.Context, assistantID int) error {
+	if err := s.assistantRepo.DeleteAssistantByID(ctx, int16(assistantID)); err != nil {
+		return status.Error(codes.Internal, err.Error())
+	}
+
+	return nil
 }

@@ -46,3 +46,11 @@ func (s *AssistantServer) GetActiveAssistants(ctx context.Context, req *pbauth.G
 
 	return mapper.AssistantsToGetActiveAssistantsResponse(assistantsData), nil
 }
+
+func (s *AssistantServer) DeleteAssistant(ctx context.Context, req *pbauth.DeleteAssistantRequest) (*pbauth.DeleteAssistantResponse, error) {
+	if err := s.serv.DeleteAssistant(ctx, int(req.GetId())); err != nil {
+		return nil, err
+	}
+
+	return &pbauth.DeleteAssistantResponse{}, nil
+}

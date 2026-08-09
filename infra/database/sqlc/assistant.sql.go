@@ -11,6 +11,16 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const deleteAssistantByID = `-- name: DeleteAssistantByID :exec
+DELETE FROM assistants
+WHERE id = $1
+`
+
+func (q *Queries) DeleteAssistantByID(ctx context.Context, id int16) error {
+	_, err := q.db.Exec(ctx, deleteAssistantByID, id)
+	return err
+}
+
 const findActiveAssistants = `-- name: FindActiveAssistants :many
 SELECT id, name, phone, password, active, period, created_at, updated_at FROM assistants
 WHERE active = TRUE

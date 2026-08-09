@@ -17,6 +17,7 @@ type AssistantRepository interface {
 	UpdatePassword(ctx context.Context, a *entity.Assistant) error
 
 	FindActiveAssistants(ctx context.Context) ([]*entity.Assistant, error)
+	DeleteAssistantByID(ctx context.Context, aID int16) error
 }
 
 type assistantRepository struct {
@@ -101,4 +102,12 @@ func (r *assistantRepository) FindActiveAssistants(ctx context.Context) ([]*enti
 	}
 
 	return assistants, nil
+}
+
+func (r *assistantRepository) DeleteAssistantByID(ctx context.Context, aID int16) error {
+	if err := r.db.DeleteAssistantByID(ctx, aID); err != nil {
+		return err
+	}
+
+	return nil
 }

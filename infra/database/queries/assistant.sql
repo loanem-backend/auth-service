@@ -20,3 +20,7 @@ WHERE id = $3;
 SELECT * FROM assistants
 WHERE active = TRUE
 ORDER BY period, name;
+
+-- name: DeleteAssistantByID :exec
+DELETE FROM assistants
+WHERE id = $1;
