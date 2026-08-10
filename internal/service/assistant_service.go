@@ -2,6 +2,9 @@ package service
 
 import (
 	"context"
+	"crypto/rand"
+	"encoding/base64"
+	"fmt"
 	"strconv"
 	"time"
 
@@ -15,7 +18,8 @@ import (
 
 type AssistantService interface {
 	Create(ctx context.Context, a *entity.Assistant) (int, error)
-	SetPassword(ctx context.Context, oldPw, newPw, confirmPw string) error
+	SendPasswordChangeConfirmation(ctx context.Context, oldPw, newPw, confirmPw string) error
+	SetPassword(ctx context.Context, pwChangeToken string) error
 
 	GetActiveAssistants(ctx context.Context) ([]*entity.Assistant, error)
 	DeleteAssistant(ctx context.Context, assistantID int) error
@@ -23,11 +27,13 @@ type AssistantService interface {
 
 type assistantService struct {
 	assistantRepo repository.AssistantRepository
+	redisRepo     repository.RedisRepository
 }
 
-func NewAssistantService(ar repository.AssistantRepository) AssistantService {
+func NewAssistantService(ar repository.AssistantRepository, rr repository.RedisRepository) AssistantService {
 	return &assistantService{
 		assistantRepo: ar,
+		redisRepo:     rr,
 	}
 }
 
@@ -59,7 +65,7 @@ func (s *assistantService) Create(ctx context.Context, a *entity.Assistant) (int
 	return int(assistantID), nil
 }
 
-func (s *assistantService) SetPassword(ctx context.Context, oldPw, newPw, confirmPw string) error {
+func (s *assistantService) SendPasswordChangeConfirmation(ctx context.Context, oldPw, newPw, confirmPw string) error {
 	if confirmPw != newPw {
 		return status.Error(codes.InvalidArgument, "password confirmation mismatches")
 	}
@@ -90,11 +96,44 @@ func (s *assistantService) SetPassword(ctx context.Context, oldPw, newPw, confir
 		return status.Error(codes.Internal, err.Error())
 	}
 
-	assistant.HashPassword = hashedNewPw
-	assistant.UpdatedAt = time.Now()
-	if err := s.assistantRepo.UpdatePassword(ctx, assistant); err != nil {
+	token, err := generatePasswordChangeToken()
+	if err != nil {
 		return status.Error(codes.Internal, err.Error())
 	}
+
+	if err := s.redisRepo.StorePasswordChange(
+		ctx,
+		prefixRedisPasswordChange+token,
+		repository.RedisPasswordChange{
+			HashedNewPassword: hashedNewPw,
+			AssistantID:       assistant.ID,
+		},
+		5*time.Minute,
+	); err != nil {
+		return status.Error(codes.Internal, err.Error())
+	}
+
+	// send confirmation
+}
+
+func generatePasswordChangeToken() (string, error) {
+	b := make([]byte, 32)
+
+	if _, err := rand.Read(b); err != nil {
+		return "", fmt.Errorf("failed generating token: %w", err)
+	}
+
+	return base64.RawURLEncoding.EncodeToString(b), nil
+}
+
+func (s *assistantService) SetPassword(ctx context.Context, pwChangeToken string) error {
+	// fetch from redis
+
+	// assistant.HashPassword = hashedNewPw
+	// assistant.UpdatedAt = time.Now()
+	// if err := s.assistantRepo.UpdatePassword(ctx, assistant); err != nil {
+	// 	return status.Error(codes.Internal, err.Error())
+	// }
 
 	return nil
 }

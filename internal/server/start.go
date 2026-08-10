@@ -24,7 +24,7 @@ func registerServers(s *grpc.Server, p *pgxpool.Pool, rc *redis.Client) {
 
 	var (
 		authServ      = service.NewAuthService(assistantRepo, redisRepo)
-		assistantServ = service.NewAssistantService(assistantRepo)
+		assistantServ = service.NewAssistantService(assistantRepo, redisRepo)
 	)
 
 	pbauth.RegisterAuthServiceServer(s, NewAuthServer(authServ))

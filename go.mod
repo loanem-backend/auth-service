@@ -7,7 +7,7 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/jackc/pgx/v5 v5.9.2
 	github.com/joho/godotenv v1.5.1
-	github.com/loanem-backend/protos v0.0.0-20260809165350-2dac372b30d5
+	github.com/loanem-backend/protos v0.0.0-20260810025051-846ce5e88e45
 	github.com/redis/go-redis/v9 v9.20.0
 	golang.org/x/crypto v0.51.0
 	google.golang.org/grpc v1.81.0

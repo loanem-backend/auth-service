@@ -5,4 +5,5 @@ const (
 
 	prefixRedisRefreshToken   = "refresh-token:"
 	prefixRedisBlacklistToken = "blacklist-token:"
+	prefixRedisPasswordChange = "password-change:"
 )
