@@ -18,9 +18,11 @@ func main() {
 	redisClient := config.InitRedisClient()
 	defer redisClient.Close()
 
+	resendClient := config.InitResendClient()
+
 	s := grpc.NewServer()
 
-	server.Start(s, db, redisClient)
+	server.Start(s, db, redisClient, resendClient)
 
 	lis := config.InitListener()
 

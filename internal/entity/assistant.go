@@ -7,6 +7,7 @@ type Assistant struct {
 	Name         string
 	Phone        string
 	HashPassword string
+	Email        string
 	Active       bool
 	Period       int
 	CreatedAt    time.Time

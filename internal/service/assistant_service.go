@@ -28,12 +28,14 @@ type AssistantService interface {
 type assistantService struct {
 	assistantRepo repository.AssistantRepository
 	redisRepo     repository.RedisRepository
+	emailServ     EmailService
 }
 
-func NewAssistantService(ar repository.AssistantRepository, rr repository.RedisRepository) AssistantService {
+func NewAssistantService(ar repository.AssistantRepository, rr repository.RedisRepository, es EmailService) AssistantService {
 	return &assistantService{
 		assistantRepo: ar,
 		redisRepo:     rr,
+		emailServ:     es,
 	}
 }
 
@@ -113,7 +115,15 @@ func (s *assistantService) SendPasswordChangeConfirmation(ctx context.Context, o
 		return status.Error(codes.Internal, err.Error())
 	}
 
-	// send confirmation
+	if err := s.emailServ.Send(ctx, emailParam{
+		to:   assistant.Email,
+		text: emailPasswordChange,
+		args: []any{token},
+	}); err != nil {
+		return status.Error(codes.Internal, err.Error())
+	}
+
+	return nil
 }
 
 func generatePasswordChangeToken() (string, error) {
@@ -127,13 +137,21 @@ func generatePasswordChangeToken() (string, error) {
 }
 
 func (s *assistantService) SetPassword(ctx context.Context, pwChangeToken string) error {
-	// fetch from redis
+	data, err := s.redisRepo.GetPasswordChange(ctx, prefixRedisPasswordChange+pwChangeToken)
+	if err != nil {
+		return status.Error(codes.Internal, err.Error())
+	}
 
-	// assistant.HashPassword = hashedNewPw
-	// assistant.UpdatedAt = time.Now()
-	// if err := s.assistantRepo.UpdatePassword(ctx, assistant); err != nil {
-	// 	return status.Error(codes.Internal, err.Error())
-	// }
+	assistant, err := s.assistantRepo.FindByID(ctx, data.AssistantID)
+	if err != nil {
+		return status.Error(codes.Internal, err.Error())
+	}
+
+	assistant.HashPassword = data.HashedNewPassword
+	assistant.UpdatedAt = time.Now()
+	if err := s.assistantRepo.UpdatePassword(ctx, assistant); err != nil {
+		return status.Error(codes.Internal, err.Error())
+	}
 
 	return nil
 }
