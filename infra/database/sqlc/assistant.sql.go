@@ -22,7 +22,7 @@ func (q *Queries) DeleteAssistantByID(ctx context.Context, id int16) error {
 }
 
 const findActiveAssistants = `-- name: FindActiveAssistants :many
-SELECT id, name, phone, password, active, period, created_at, updated_at FROM assistants
+SELECT id, name, phone, password, active, period, created_at, updated_at, email FROM assistants
 WHERE active = TRUE
 ORDER BY period, name
 `
@@ -45,6 +45,7 @@ func (q *Queries) FindActiveAssistants(ctx context.Context) ([]Assistant, error)
 			&i.Period,
 			&i.CreatedAt,
 			&i.UpdatedAt,
+			&i.Email,
 		); err != nil {
 			return nil, err
 		}
@@ -57,7 +58,7 @@ func (q *Queries) FindActiveAssistants(ctx context.Context) ([]Assistant, error)
 }
 
 const findAssistantByID = `-- name: FindAssistantByID :one
-SELECT id, name, phone, password, active, period, created_at, updated_at FROM assistants
+SELECT id, name, phone, password, active, period, created_at, updated_at, email FROM assistants
 WHERE id = $1
 `
 
@@ -73,12 +74,13 @@ func (q *Queries) FindAssistantByID(ctx context.Context, id int16) (Assistant, e
 		&i.Period,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.Email,
 	)
 	return i, err
 }
 
 const findAssistantByPhone = `-- name: FindAssistantByPhone :one
-SELECT id, name, phone, password, active, period, created_at, updated_at FROM assistants
+SELECT id, name, phone, password, active, period, created_at, updated_at, email FROM assistants
 WHERE phone = $1
 `
 
@@ -94,13 +96,14 @@ func (q *Queries) FindAssistantByPhone(ctx context.Context, phone string) (Assis
 		&i.Period,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.Email,
 	)
 	return i, err
 }
 
 const insertAssistant = `-- name: InsertAssistant :one
-INSERT INTO assistants (name, phone, password, period)
-VALUES ($1, $2, $3, $4)
+INSERT INTO assistants (name, phone, password, period, email)
+VALUES ($1, $2, $3, $4, $5)
 RETURNING id
 `
 
@@ -109,6 +112,7 @@ type InsertAssistantParams struct {
 	Phone    string
 	Password pgtype.Text
 	Period   int16
+	Email    pgtype.Text
 }
 
 func (q *Queries) InsertAssistant(ctx context.Context, arg InsertAssistantParams) (int16, error) {
@@ -117,6 +121,7 @@ func (q *Queries) InsertAssistant(ctx context.Context, arg InsertAssistantParams
 		arg.Phone,
 		arg.Password,
 		arg.Period,
+		arg.Email,
 	)
 	var id int16
 	err := row.Scan(&id)

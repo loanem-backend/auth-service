@@ -4,14 +4,7 @@ services:
   migrate:
     image: migrate/migrate
     profiles: ["manual"]
-    depends_on:
-      - postgres
-    entrypoint:
-      - "migrate"
-      - "-path"
-      - "/migrations"
-      - "-database"
-      - "postgres://${DB_USER}:${DB_PASS}@postgres:5432/${DB_NAME}?sslmode=disable"
+    entrypoint: ["migrate", "create", "-ext", "sql", "-dir", "/migrations"]
     volumes:
       - ./infra/database/migrations:/migrations
 

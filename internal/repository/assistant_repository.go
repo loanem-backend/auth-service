@@ -59,6 +59,7 @@ func toAssistant(row sqlc.Assistant) *entity.Assistant {
 		HashPassword: row.Password.String,
 		Active:       row.Active,
 		Period:       int(row.Period),
+		Email:        row.Email.String,
 		CreatedAt:    row.CreatedAt.Time,
 		UpdatedAt:    row.UpdatedAt.Time,
 	}
@@ -70,6 +71,7 @@ func (r *assistantRepository) Insert(ctx context.Context, a *entity.Assistant) (
 		Phone:    a.Phone,
 		Password: pgtype.Text{String: a.HashPassword, Valid: true},
 		Period:   int16(a.Period),
+		Email:    pgtype.Text{String: a.Email, Valid: a.Email != ""},
 	})
 	if err != nil {
 		return 0, err
