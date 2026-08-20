@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/loanem-backend/auth-service/config"
 	"github.com/loanem-backend/auth-service/internal/entity"
 	"github.com/loanem-backend/auth-service/internal/repository"
 	"github.com/loanem-backend/auth-service/pkg/bcryptx"
@@ -118,7 +119,7 @@ func (s *assistantService) SendPasswordChangeConfirmation(ctx context.Context, o
 	if err := s.emailServ.Send(ctx, emailParam{
 		to:   assistant.Email,
 		text: emailPasswordChange,
-		args: []any{token},
+		args: []any{fmt.Sprintf("https://%s/me/password?token=%s", config.GetEnv("BASE_URL", ""), token)},
 	}); err != nil {
 		return status.Error(codes.Internal, err.Error())
 	}
