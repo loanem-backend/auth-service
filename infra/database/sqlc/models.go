@@ -17,4 +17,5 @@ type Assistant struct {
 	Period    int16
 	CreatedAt pgtype.Timestamp
 	UpdatedAt pgtype.Timestamp
+	Email     pgtype.Text
 }

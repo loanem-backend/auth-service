@@ -10,6 +10,7 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/redis/go-redis/v9"
+	"github.com/resend/resend-go/v3"
 )
 
 func GetEnv(key, defaultValue string) string {
@@ -70,4 +71,10 @@ func InitRedisClient() *redis.Client {
 	})
 
 	return rdb
+}
+
+func InitResendClient() *resend.Client {
+	apiKey := os.Getenv("RESEND_API_KEY")
+
+	return resend.NewClient(apiKey)
 }

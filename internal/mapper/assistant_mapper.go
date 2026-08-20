@@ -11,6 +11,7 @@ func CreateAssistantRequestToAssistant(req *pbauth.CreateAssistantRequest) *enti
 		Name:   req.GetName(),
 		Phone:  req.GetPhone(),
 		Period: int(req.GetPeriod()),
+		Email:  req.GetEmail(),
 	}
 }
 
@@ -21,6 +22,7 @@ func AssistantToPbAssistant(assistant *entity.Assistant) *pbauth.Assistant {
 		Phone:     assistant.Phone,
 		Period:    int32(assistant.Period),
 		Active:    assistant.Active,
+		Email:     assistant.Email,
 		CreatedAt: timestamppb.New(assistant.CreatedAt),
 		UpdatedAt: timestamppb.New(assistant.UpdatedAt),
 	}

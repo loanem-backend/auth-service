@@ -1,0 +1,2 @@
+ALTER TABLE assistants
+    ADD COLUMN email VARCHAR(255);

@@ -17,6 +17,7 @@ type AssistantRepository interface {
 	UpdatePassword(ctx context.Context, a *entity.Assistant) error
 
 	FindActiveAssistants(ctx context.Context) ([]*entity.Assistant, error)
+	DeleteAssistantByID(ctx context.Context, aID int16) error
 }
 
 type assistantRepository struct {
@@ -58,6 +59,7 @@ func toAssistant(row sqlc.Assistant) *entity.Assistant {
 		HashPassword: row.Password.String,
 		Active:       row.Active,
 		Period:       int(row.Period),
+		Email:        row.Email.String,
 		CreatedAt:    row.CreatedAt.Time,
 		UpdatedAt:    row.UpdatedAt.Time,
 	}
@@ -69,6 +71,7 @@ func (r *assistantRepository) Insert(ctx context.Context, a *entity.Assistant) (
 		Phone:    a.Phone,
 		Password: pgtype.Text{String: a.HashPassword, Valid: true},
 		Period:   int16(a.Period),
+		Email:    pgtype.Text{String: a.Email, Valid: a.Email != ""},
 	})
 	if err != nil {
 		return 0, err
@@ -101,4 +104,12 @@ func (r *assistantRepository) FindActiveAssistants(ctx context.Context) ([]*enti
 	}
 
 	return assistants, nil
+}
+
+func (r *assistantRepository) DeleteAssistantByID(ctx context.Context, aID int16) error {
+	if err := r.db.DeleteAssistantByID(ctx, aID); err != nil {
+		return err
+	}
+
+	return nil
 }

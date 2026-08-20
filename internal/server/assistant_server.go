@@ -30,8 +30,16 @@ func (s *AssistantServer) CreateAssistant(ctx context.Context, req *pbauth.Creat
 	}, nil
 }
 
+func (s *AssistantServer) SubmitAssistantPasswordChange(ctx context.Context, req *pbauth.SubmitAssistantPasswordChangeRequest) (*pbauth.SubmitAssistantPasswordChangeResponse, error) {
+	if err := s.serv.SendPasswordChangeConfirmation(ctx, req.GetOldPassword(), req.GetNewPassword(), req.GetConfirmPassword()); err != nil {
+		return nil, err
+	}
+
+	return &pbauth.SubmitAssistantPasswordChangeResponse{}, nil
+}
+
 func (s *AssistantServer) SetAssistantPassword(ctx context.Context, req *pbauth.SetAssistantPasswordRequest) (*pbauth.SetAssistantPasswordResponse, error) {
-	if err := s.serv.SetPassword(ctx, req.GetOldPassword(), req.GetNewPassword(), req.GetConfirmPassword()); err != nil {
+	if err := s.serv.SetPassword(ctx, req.GetChangePasswordToken()); err != nil {
 		return nil, err
 	}
 
@@ -45,4 +53,12 @@ func (s *AssistantServer) GetActiveAssistants(ctx context.Context, req *pbauth.G
 	}
 
 	return mapper.AssistantsToGetActiveAssistantsResponse(assistantsData), nil
+}
+
+func (s *AssistantServer) DeleteAssistant(ctx context.Context, req *pbauth.DeleteAssistantRequest) (*pbauth.DeleteAssistantResponse, error) {
+	if err := s.serv.DeleteAssistant(ctx, int(req.GetId())); err != nil {
+		return nil, err
+	}
+
+	return &pbauth.DeleteAssistantResponse{}, nil
 }

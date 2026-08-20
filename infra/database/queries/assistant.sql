@@ -7,8 +7,8 @@ SELECT * FROM assistants
 WHERE id = $1;
 
 -- name: InsertAssistant :one
-INSERT INTO assistants (name, phone, password, period)
-VALUES ($1, $2, $3, $4)
+INSERT INTO assistants (name, phone, password, period, email)
+VALUES ($1, $2, $3, $4, $5)
 RETURNING id;
 
 -- name: SetAssistantPassword :exec
@@ -20,3 +20,7 @@ WHERE id = $3;
 SELECT * FROM assistants
 WHERE active = TRUE
 ORDER BY period, name;
+
+-- name: DeleteAssistantByID :exec
+DELETE FROM assistants
+WHERE id = $1;
