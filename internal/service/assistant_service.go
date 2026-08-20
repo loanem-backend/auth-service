@@ -119,7 +119,7 @@ func (s *assistantService) SendPasswordChangeConfirmation(ctx context.Context, o
 	if err := s.emailServ.Send(ctx, emailParam{
 		to:   assistant.Email,
 		text: emailPasswordChange,
-		args: []any{fmt.Sprintf("https://%s/me/password?token=%s", config.GetEnv("BASE_URL", ""), token)},
+		args: []any{fmt.Sprintf("%s/me/password?token=%s", config.GetEnv("BASE_URL", ""), token)},
 	}); err != nil {
 		return status.Error(codes.Internal, err.Error())
 	}
